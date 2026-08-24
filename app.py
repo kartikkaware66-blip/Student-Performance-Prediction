@@ -224,177 +224,60 @@ internal_marks = st.number_input(
 # Prediction button
 if st.button("🎯 Predict Result"):
 
-    # Input data
-    input_data = pd.DataFrame({
-        "Study_Hours": [study_hours],
-        "Attendance": [attendance],
-        "Previous_Marks": [previous_marks],
-        "Assignment": [assignment],
-        "Internal_Marks": [internal_marks]
-    })
+    if student_name == "" or roll_no == "":
+        st.warning("⚠️ Please enter Student Name and Roll Number")
 
-    # Prediction
-    prediction = model.predict(input_data)
-
-    # Probability
-    probability = model.predict_proba(input_data)
-
-    pass_probability = probability[0][1] * 100
-    fail_probability = probability[0][0] * 100
-
-    st.divider()
-
-    # ==============================
-    # RESULT
-    # ==============================
-
-    if prediction[0] == 1:
-        st.success("✅ Predicted Result: PASS")
     else:
-        st.error("❌ Predicted Result: FAIL")
+        # Input data
+        input_data = pd.DataFrame({
+            "Study_Hours": [study_hours],
+            "Attendance": [attendance],
+            "Previous_Marks": [previous_marks],
+            "Assignment": [assignment],
+            "Internal_Marks": [internal_marks]
+        })
 
-    # ==============================
-    # PREDICTION PROBABILITY
-    # ==============================
+        # Prediction
+        prediction = model.predict(input_data)
 
-    st.subheader("🎯 Prediction Probability")
+        # Probability
+        probability = model.predict_proba(input_data)[0]
 
-    col1, col2 = st.columns(2)
+        fail_probability = probability[0] * 100
+        pass_probability = probability[1] * 100
 
-    with col1:
-        st.metric("PASS Probability", f"{pass_probability:.1f}%")
-
-    with col2:
-        st.metric("FAIL Probability", f"{fail_probability:.1f}%")
-
-    # ==============================
-    # PERFORMANCE SCORE
-    # ==============================
-
-    performance_score = (
-        (study_hours / 24 * 100)
-        + attendance
-        + previous_marks
-        + assignment
-        + internal_marks
-    ) / 5
-
-    if performance_score >= 80:
-        performance_level = "🏆 Excellent"
-    elif performance_score >= 65:
-        performance_level = "👍 Good"
-    elif performance_score >= 50:
-        performance_level = "⚠️ Average"
-    else:
-        performance_level = "❗ Poor"
-
-    st.subheader("🏆 Performance Level")
-    st.info(performance_level)
-
-    st.write(
-        f"**Overall Performance Score:** {performance_score:.1f}%"
-    )
-
-    # ==============================
-    # INPUT VALUES GRAPH
-    # ==============================
-
-    st.subheader("📈 Student Performance Graph")
-
-    graph_data = pd.DataFrame({
-        "Parameter": [
-            "Study Hours",
-            "Attendance",
-            "Previous Marks",
-            "Assignment",
-            "Internal Marks"
-        ],
-        "Value": [
-            study_hours / 24 * 100,
-            attendance,
-            previous_marks,
-            assignment,
+        # Performance Level
+        average = (
+            attendance +
+            previous_marks +
+            assignment +
             internal_marks
-        ]
-    })
+        ) / 4
 
-    st.bar_chart(
-        graph_data.set_index("Parameter")
-    )
+        if average >= 85:
+            performance = "Excellent 🏆"
+        elif average >= 70:
+            performance = "Good 👍"
+        elif average >= 50:
+            performance = "Average 🙂"
+        else:
+            performance = "Poor ⚠️"
 
-    # ==============================
-    # IMPROVEMENT SUGGESTIONS
-    # ==============================
+        # Student Report
+        st.markdown("---")
+        st.subheader("📊 Student Performance Report")
 
-    st.subheader("💡 Improvement Suggestions")
+        st.write("👤 **Student Name:**", student_name)
+        st.write("🎫 **Roll Number:**", roll_no)
 
-    suggestions = []
+        if prediction[0] == 1:
+            st.success("🎉 Predicted Result: PASS")
+        else:
+            st.error("❌ Predicted Result: FAIL")
 
-    if study_hours < 4:
-        suggestions.append(
-            "📚 Increase your daily study hours."
-        )
+        st.write(f"🎯 **Pass Probability:** {pass_probability:.2f}%")
+        st.write(f"❌ **Fail Probability:** {fail_probability:.2f}%")
+        st.write(f"🏆 **Performance Level:** {performance}")
 
-    if attendance < 75:
-        suggestions.append(
-            "🏫 Improve your class attendance."
-        )
-
-    if previous_marks < 60:
-        suggestions.append(
-            "📝 Focus more on previous exam topics."
-        )
-
-    if assignment < 60:
-        suggestions.append(
-            "📄 Complete assignments regularly."
-        )
-
-    if internal_marks < 60:
-        suggestions.append(
-            "✍️ Improve preparation for internal exams."
-        )
-
-    if len(suggestions) == 0:
-        suggestions.append(
-            "🌟 Excellent! Keep maintaining your performance."
-        )
-
-    for suggestion in suggestions:
-        st.write(suggestion)
-
-    # ==============================
-    # REPORT
-    # ==============================
-
-    report = f"""
-STUDENT PERFORMANCE PREDICTION REPORT
-======================================
-
-Student Name: {student_name}
-Roll Number: {roll_no}
-
-Study Hours: {study_hours}
-Attendance: {attendance}%
-Previous Marks: {previous_marks}
-Assignment Marks: {assignment}
-Internal Marks: {internal_marks}
-
-Predicted Result: {"PASS" if prediction[0] == 1 else "FAIL"}
-
-Pass Probability: {pass_probability:.1f}%
-Fail Probability: {fail_probability:.1f}%
-
-Performance Score: {performance_score:.1f}%
-Performance Level: {performance_level}
-
-======================================
-"""
-
-    # Download report
-    st.download_button(
-        label="📥 Download Prediction Report",
-        data=report,
-        file_name="student_prediction_report.txt",
-        mime="text/plain"
-    )
+        st.write("📈 Pass Probability")
+        st.progress(int(pass_probability))
