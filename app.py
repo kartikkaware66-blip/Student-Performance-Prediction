@@ -148,11 +148,11 @@ st.markdown("""
 }
 
 h1 {
-    color: #123B66;
+    color: #38DF8;
 }
 
 h2, h3 {
-    color: #1F5F8B;
+    color: #E2E8F0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -281,3 +281,52 @@ if st.button("🎯 Predict Result"):
 
         st.write("📈 Pass Probability")
         st.progress(int(pass_probability))
+        # 📈 Student Performance Dashboard
+st.markdown("---")
+st.subheader("📈 Student Performance Dashboard")
+
+chart_data = pd.DataFrame({
+    "Parameter": [
+        "Study Hours",
+        "Attendance",
+        "Previous Marks",
+        "Assignment",
+        "Internal Marks"
+    ],
+    "Score": [
+        study_hours,
+        attendance,
+        previous_marks,
+        assignment,
+        internal_marks
+    ]
+})
+
+st.bar_chart(chart_data.set_index("Parameter"))
+        # Improvement Suggestions
+st.markdown("---")
+st.subheader("💡 Improvement Suggestions")
+
+suggestions = []
+
+if study_hours < 3:
+    suggestions.append("📚 Increase study hours to at least 3 hours daily.")
+
+if attendance < 75:
+    suggestions.append("🏫 Improve attendance. Try to maintain above 75%.")
+
+if previous_marks < 50:
+    suggestions.append("📝 Focus more on previous weak subjects.")
+
+if assignment < 50:
+    suggestions.append("📖 Complete assignments regularly.")
+
+if internal_marks < 50:
+    suggestions.append("✍️ Improve internal test preparation.")
+
+if not suggestions:
+    st.success("🌟 Excellent! Keep maintaining your current performance.")
+
+else:
+    for suggestion in suggestions:
+        st.info(suggestion)
